@@ -59,11 +59,10 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen kustomize yq ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	rm -rf charts/moco/templates/generated/
-	mkdir -p charts/moco/templates/generated/crds/
+	for DIR in charts/moco/templates/generated/ charts/moco/crds/; do rm -rf $${DIR}; mkdir -p $${DIR}; done
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	$(KUSTOMIZE) build config/crd -o config/crd/tests # Outputs static CRDs for use with Envtest.
-	$(KUSTOMIZE) build config/kustomize-to-helm/overlays/crds | $(YQ) e "." - > charts/moco/templates/generated/crds/moco_crds.yaml
+	$(KUSTOMIZE) build config/kustomize-to-helm/overlays/crds | $(YQ) e "." - > charts/moco/crds/moco_crds.yaml
 	$(KUSTOMIZE) build config/kustomize-to-helm/overlays/templates | $(YQ) e "." - > charts/moco/templates/generated/generated.yaml
 
 .PHONY: generate
